@@ -1,12 +1,19 @@
+#pragma once
 #include <windows.h>
+#include "NoteParser.h"
 
 
 #define IDC_MAIN_EDIT 101
+#define ID_FILE_EXIT 9001
+#define ID_ABOUT 9002
+#define ID_HELP 9003
+#define ID_INPROGRESS 9020
 
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
 const char g_WindowTitle[] = "Labor Calculator V0.0.0";
+NoteParser g_crafter;
 HWND hNote, hHour, hMin;
 
 //Global Funcs
@@ -29,7 +36,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hInstance = hInstance;
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wc.hbrBackground = CreateSolidBrush(RGB(4, 66, 89));
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = g_szClassName;
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -42,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, g_WindowTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 500, 600, NULL, NULL, hInstance, NULL);
+		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, NULL, NULL, hInstance, NULL);
 
 	if (hwnd == NULL)
 	{
@@ -71,6 +78,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		AddMenu(hwnd);
 		AddControls(hwnd);
 		break;
+	case WM_COMMAND:
+		switch (wParam)
+		{
+		case ID_FILE_EXIT:
+			PostQuitMessage(0);
+			break;
+		case ID_ABOUT:
+			MessageBox(NULL, "I just figured I could save time with a quick application removing empty lines from my labor notes and running everything through a calculator.\nAlso, slightly faster than Excel.\n\n-Marius Ventus", "About", MB_OK | MB_ICONINFORMATION);
+			break;
+		case ID_HELP:
+			MessageBox(NULL, "No help, only Zuul.\nOr reaching me on Teams.\n\nOr the Readme:\nhttps://github.com/MariusVentus/LaborCalculator/blob/master/README.md ", "Halp", MB_OK | MB_ICONINFORMATION);
+			break;
+		case ID_INPROGRESS:
+			MessageBox(NULL, "Apologies, this feature is under construction.", "Under Construction", MB_OK | MB_ICONEXCLAMATION);
+			break;
+		}
+		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -89,24 +113,23 @@ void AddMenu(HWND hwnd)
 	hMenu = CreateMenu();
 	//File Menu
 	hFileMenu = CreatePopupMenu();
-	AppendMenu(hFileMenu, MF_STRING, NULL, "Add to Ignore List");
-	AppendMenu(hFileMenu, MF_STRING, NULL, "Clear Ignore List");
-	AppendMenu(hFileMenu, MF_STRING, NULL, "Reset Ignore List");
+	AppendMenu(hFileMenu, MF_STRING, ID_INPROGRESS, "Open Ignore List");
 	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(hFileMenu, MF_STRING, NULL, "Exit");
+	AppendMenu(hFileMenu, MF_STRING, ID_FILE_EXIT, "Exit");
 	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
 	//Settings Menu
 	hSettingsMenu = CreatePopupMenu();
-	AppendMenu(hSettingsMenu, MF_STRING, NULL, "Settings");
-	AppendMenu(hSettingsMenu, MF_STRING, NULL, "AI Generator");
-	AppendMenu(hSettingsMenu, MF_STRING, NULL, "Feed AI");
-	AppendMenu(hSettingsMenu, MF_STRING, NULL, "Train AI");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Settings");
+	AppendMenu(hSettingsMenu, MF_SEPARATOR, NULL, NULL);
+	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "AI Generator");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Feed AI");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Train AI");
 	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSettingsMenu, "Generator");
 
 
-	//Remaining Main Menu Items
-	AppendMenu(hMenu, MF_STRING, NULL, "About");
-	AppendMenu(hMenu, MF_STRING, NULL, "Help");
+	//Remaining Main Menu Items1e1e1e
+	AppendMenu(hMenu, MF_STRING, ID_ABOUT, "About");
+	AppendMenu(hMenu, MF_STRING, ID_HELP, "Help");
 
 	SetMenu(hwnd, hMenu);
 }
@@ -114,16 +137,29 @@ void AddMenu(HWND hwnd)
 void AddControls(HWND hwnd)
 {
 
-
-	hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Overview | Xmin\nCalls | Ymin\nNotes | Zmin",
+	//Notes
+	CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " Labor Notes ", WS_CHILD | WS_VISIBLE,
+		15, 20, 380, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+	hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Action A | X Minutes\r\nAction B | Y Minutes",
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-		15, 210, 450, 200, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-
-	//Scrubber, Calculator, Copy to ClipBoard
-	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Clean, Calc, and Copy", WS_CHILD | WS_VISIBLE,
-		25, 470, 200, 50, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		15, 45, 380, 300, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
 	//Generate
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Generate", WS_CHILD | WS_VISIBLE,
-		255, 470, 200, 50, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		400, 20, 70, 50, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+
+	//Hours
+	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,
+		400, 75, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+	hHour = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "0", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+		400, 100, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+	//Minutes
+	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Minutes ", WS_CHILD | WS_VISIBLE | SS_CENTER,
+		400, 155, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+	hMin = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "0", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+		400, 180, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+
+	//Scrubber, Calculator, Copy to ClipBoard
+	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Clean, Calc, and Copy", WS_CHILD | WS_VISIBLE,
+		15, 360, 440, 50, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
 }
