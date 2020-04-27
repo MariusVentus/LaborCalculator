@@ -131,6 +131,19 @@
   <ItemGroup>
     <ClInclude Include="NoteParser.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Settings\IgnoreList.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\LC Logo.bmp" />
+    <Image Include="Resources\LC Logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

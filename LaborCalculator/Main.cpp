@@ -7,13 +7,15 @@
 #define ID_FILE_EXIT 9001
 #define ID_ABOUT 9002
 #define ID_HELP 9003
+#define ID_CALC 9004
+#define ID_OPENIGNORE 9005
 #define ID_INPROGRESS 9020
 
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
-const char g_WindowTitle[] = "Labor Calculator V0.0.0";
-NoteParser g_crafter;
+const char g_WindowTitle[] = "Labor Calculator V0.0.1";
+NoteParser g_Crafter;
 HWND hNote, hHour, hMin;
 
 //Global Funcs
@@ -34,12 +36,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = CreateSolidBrush(RGB(4, 66, 89));
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = g_szClassName;
-	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hIconSm = (HICON)LoadImage(hInstance, "Resources\\LC Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	wc.hIcon = (HICON)LoadImage(hInstance, "Resources\\LC Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
 
 	if (!RegisterClassEx(&wc))
 	{
@@ -81,6 +83,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
+		case ID_OPENIGNORE:
+			ShellExecute(hwnd, "open", g_Crafter.GetIgnoreLoc().c_str(), NULL, NULL, SW_SHOW);
+			g_Crafter.SetIgnoreOpened(true);
+			break;
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
 			break;
@@ -92,6 +98,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_INPROGRESS:
 			MessageBox(NULL, "Apologies, this feature is under construction.", "Under Construction", MB_OK | MB_ICONEXCLAMATION);
+			break;
+		case ID_CALC:
+			//Init
+			char rawNote[3000] = "";
+			std::string stringNote = "";
+			GetWindowText(hNote, rawNote, 3000);
+			stringNote = rawNote;
+			//Parse and Update
+			stringNote = g_Crafter.ParseNCalc(stringNote);
+			SetWindowText(hNote, stringNote.c_str());
+			SetWindowText(hHour, g_Crafter.GetHours().c_str());
+			SetWindowText(hMin, g_Crafter.GetMinutes().c_str());
+			//Copy to Clipboard
+			OpenClipboard(hwnd);
+			EmptyClipboard();
+			HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, stringNote.size() + 1);
+			if (!hg) {
+				CloseClipboard();
+			}
+			else {
+				memcpy(GlobalLock(hg), stringNote.c_str(), stringNote.size() + 1);
+				GlobalUnlock(hg);
+				SetClipboardData(CF_TEXT, hg);
+				CloseClipboard();
+			}
+			GlobalFree(hg);
+			//End
 			break;
 		}
 		break;
@@ -113,7 +146,7 @@ void AddMenu(HWND hwnd)
 	hMenu = CreateMenu();
 	//File Menu
 	hFileMenu = CreatePopupMenu();
-	AppendMenu(hFileMenu, MF_STRING, ID_INPROGRESS, "Open Ignore List");
+	AppendMenu(hFileMenu, MF_STRING, ID_OPENIGNORE, "Open Ignore List");
 	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hFileMenu, MF_STRING, ID_FILE_EXIT, "Exit");
 	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
@@ -140,7 +173,7 @@ void AddControls(HWND hwnd)
 	//Notes
 	CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " Labor Notes ", WS_CHILD | WS_VISIBLE,
 		15, 20, 380, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
-	hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Action A | X Minutes\r\nAction B | Y Minutes",
+	hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Action A | X Minutes\r\nAction B | Y Minutes\r\nAction C | Z Minutes",
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
 		15, 45, 380, 300, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
@@ -151,15 +184,15 @@ void AddControls(HWND hwnd)
 	//Hours
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,
 		400, 75, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
-	hHour = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "0", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+	hHour = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
 		400, 100, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 	//Minutes
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Minutes ", WS_CHILD | WS_VISIBLE | SS_CENTER,
 		400, 155, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
-	hMin = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "0", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+	hMin = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
 		400, 180, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
 	//Scrubber, Calculator, Copy to ClipBoard
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Clean, Calc, and Copy", WS_CHILD | WS_VISIBLE,
-		15, 360, 440, 50, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+		15, 360, 440, 50, hwnd, (HMENU)ID_CALC, GetModuleHandle(NULL), NULL);
 }
