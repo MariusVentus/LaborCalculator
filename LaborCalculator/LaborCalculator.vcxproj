@@ -125,13 +125,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Generator.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NoteParser.cpp" />
+    <ClCompile Include="RandHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Generator.h" />
     <ClInclude Include="NoteParser.h" />
+    <ClInclude Include="RandHandler.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Settings\Generator.txt" />
+    <Text Include="Settings\GeneratorDefault.txt" />
     <Text Include="Settings\IgnoreList.txt" />
   </ItemGroup>
   <ItemGroup>

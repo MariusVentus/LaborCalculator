@@ -17,10 +17,9 @@ std::string NoteParser::ParseNCalc(const std::string& inStr)
 	m_Hours = 0;
 	m_Minutes = 0;
 	//Check Ignore List
-	if(m_IgnoreOpened){
-		RefreshIgnoreList();
-		m_IgnoreOpened = false;
-	}
+
+	RefreshIgnoreList(); // Not as efficient, but safe.
+
 	//Parse Input
 	do {
 		token.clear();

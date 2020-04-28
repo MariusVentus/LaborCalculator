@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include "Generator.h"
 #include "NoteParser.h"
 
 
@@ -8,14 +9,17 @@
 #define ID_ABOUT 9002
 #define ID_HELP 9003
 #define ID_CALC 9004
-#define ID_OPENIGNORE 9005
+#define ID_OPEN_IGNORE_LIST 9005
+#define ID_GENERATE 9006
+#define ID_OPENGENSET 9007
 #define ID_INPROGRESS 9020
 
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
-const char g_WindowTitle[] = "Labor Calculator V0.0.1";
+const char g_WindowTitle[] = "Labor Calculator V0.0.2";
 NoteParser g_Crafter;
+Generator g_Generator;
 HWND hNote, hHour, hMin;
 
 //Global Funcs
@@ -83,9 +87,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (wParam)
 		{
-		case ID_OPENIGNORE:
+		case ID_OPEN_IGNORE_LIST:
 			ShellExecute(hwnd, "open", g_Crafter.GetIgnoreLoc().c_str(), NULL, NULL, SW_SHOW);
-			g_Crafter.SetIgnoreOpened(true);
 			break;
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
@@ -98,6 +101,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_INPROGRESS:
 			MessageBox(NULL, "Apologies, this feature is under construction.", "Under Construction", MB_OK | MB_ICONEXCLAMATION);
+			break;
+		case ID_GENERATE:
+			SetWindowText(hNote, g_Generator.GenerateLabor(6).c_str());
+			break;
+		case ID_OPENGENSET:
+			if (MessageBoxW(hwnd, L"A UI has not been completed for Generator Settings. This will directly open the Generator.txt settings file, and this access was for testing purposes.\n\nAre you sure your want to enter?", L"Wait", 
+				MB_OKCANCEL | MB_ICONERROR) == IDOK) {
+				ShellExecute(hwnd, "open", g_Generator.GetGenSettingsLoc().c_str(), NULL, NULL, SW_SHOW);
+			}
 			break;
 		case ID_CALC:
 			//Init
@@ -146,13 +158,13 @@ void AddMenu(HWND hwnd)
 	hMenu = CreateMenu();
 	//File Menu
 	hFileMenu = CreatePopupMenu();
-	AppendMenu(hFileMenu, MF_STRING, ID_OPENIGNORE, "Open Ignore List");
+	AppendMenu(hFileMenu, MF_STRING, ID_OPEN_IGNORE_LIST, "Open Ignore List");
 	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hFileMenu, MF_STRING, ID_FILE_EXIT, "Exit");
 	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
 	//Settings Menu
 	hSettingsMenu = CreatePopupMenu();
-	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Settings");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_OPENGENSET, "Settings");
 	AppendMenu(hSettingsMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "AI Generator");
 	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Feed AI");
@@ -179,7 +191,7 @@ void AddControls(HWND hwnd)
 
 	//Generate
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Generate", WS_CHILD | WS_VISIBLE,
-		400, 20, 70, 50, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+		400, 20, 70, 50, hwnd, (HMENU)ID_GENERATE, GetModuleHandle(NULL), NULL);
 
 	//Hours
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,

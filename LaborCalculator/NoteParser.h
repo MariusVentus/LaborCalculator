@@ -9,14 +9,12 @@ public:
 	std::string GetHours(void) const { return std::to_string(m_Hours); }
 	std::string GetMinutes(void) const { return std::to_string(m_Minutes); }
 	std::string GetIgnoreLoc(void) const { return m_IgnoreLoc; }
-	void SetIgnoreOpened(bool val) { m_IgnoreOpened = val; }
 	void RefreshIgnoreList(void);
 	void Test(void);
 private:
 	//Variables and Constants
 	const std::string m_IgnoreLoc = "Settings\\IgnoreList.txt";
 	std::vector<std::string> m_IgnoreList;
-	bool m_IgnoreOpened = false;
 	unsigned m_Hours = 0;
 	unsigned m_Minutes = 0;
 	//Funcs

@@ -24,14 +24,32 @@
     <ClCompile Include="NoteParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Generator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NoteParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Generator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Settings\IgnoreList.txt">
+      <Filter>Settings</Filter>
+    </Text>
+    <Text Include="Settings\Generator.txt">
+      <Filter>Settings</Filter>
+    </Text>
+    <Text Include="Settings\GeneratorDefault.txt">
       <Filter>Settings</Filter>
     </Text>
   </ItemGroup>

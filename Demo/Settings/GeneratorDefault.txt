@@ -1,0 +1,10 @@
+;;[Setting]
+;;Entry
+;;Integers > Base, BaseRange, HourlyIncrease, TriggerHour, BaseTriggerBonus, BaseTriggerBonusRange
+;;[Base Generator]
+Overview
+3,3 ;;3-6 initially, no further increases
+Updates
+5,2,1 ;;5-7 initially, with 0-1 every hour
+Triage
+0,0,0,6,8,4 ;;6th hour, has a chance of 8-12

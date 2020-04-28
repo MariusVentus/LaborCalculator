@@ -8,11 +8,13 @@ Also has an ignore list, just in case a specific combination of numbers and lett
 ***Release Notes***
 V0.0.0 - Project Start!
 
-V0.0.0 - "Clean, Calc, and Copy" button implemented. Ignore list working, and it can be accessed from the File menu. Also Icons real quick. Demo!
+V0.0.1 - "Clean, Calc, and Copy" button implemented. Ignore list working, and it can be accessed from the File menu. Also Icons real quick. Demo!
+
+V0.0.2 - Generator added which randomly generates expected labor from a period of time, automatically assumes 6 hours, quick access to settings file added.
 
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
-1.) Generator which randomly generates expected labor from a period of time.
+1.) Add Hours input for generator to know the worked period of time.
 
 2.) Settings button to allow user addition and customization of expected labor actions.
 
