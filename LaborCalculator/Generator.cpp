@@ -58,7 +58,7 @@ std::string Generator::GenerateLabor(const unsigned inHours)
 		output.append(m_LEs[i].GetEvent());
 		output.append(" ");
 		output.append(std::to_string(m_LEs[i].EstimatedLabor(inHours, m_Rand)));
-		output.append(" minutes\r\n");
+		output.append("\r\n");
 	}
 	return output;
 }
