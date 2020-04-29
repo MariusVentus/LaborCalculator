@@ -12,13 +12,11 @@ V0.0.1 - "Clean, Calc, and Copy" button implemented. Ignore list working, and it
 
 V0.0.2 - Generator added which randomly generates expected labor from a period of time, automatically assumes 6 hours, quick access to settings file added.
 
+V0.0.3 - Added Generator window for the input of hours. Determined that Settings button not optimal for generator settings, since it effectively requires altering the config. Added manual instead.
+
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 
-1.) Add Hours input for generator to know the worked period of time.
+1.) Improved code (As always, this is just a quick project, so main.cpp is spaghetti)
 
-2.) Settings button to allow user addition and customization of expected labor actions.
-
-3.) Improved code (As always, this is just a quick project, so main.cpp is spaghetti)
-
-4.) AI Generator - Ability to feed raw notes about user actions and expected labor into an AI, and then train the AI to guestamate labor from new notes.
+2.) AI Generator - Ability to feed raw notes about user actions and expected labor into an AI, and then train the AI to guestamate labor from new notes.
 Currently, hardware limitations make this a far-off goal.

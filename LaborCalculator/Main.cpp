@@ -12,26 +12,32 @@
 #define ID_OPEN_IGNORE_LIST 9005
 #define ID_GENERATE 9006
 #define ID_OPENGENSET 9007
+#define ID_GENSETHELP 9008
 #define ID_INPROGRESS 9020
 
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
-const char g_WindowTitle[] = "Labor Calculator V0.0.2";
+const char g_WindowTitle[] = "Labor Calculator V0.0.3";
 NoteParser g_Crafter;
 Generator g_Generator;
-HWND hNote, hHour, hMin;
+HWND hMainWindow, hGenWindow, hNote, hHour, hLocalHour, hMin;
+RECT rcMain;
+
 
 //Global Funcs
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void AddMenu(HWND hwnd);
 void AddControls(HWND hwnd);
+void RegisterGeneratorWindow(HINSTANCE hInst);
+void OpenGeneratorWindow(HWND hWnd);
+LRESULT CALLBACK GenWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wc;
-	HWND hwnd;
 	MSG Msg;
 
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -54,18 +60,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, g_WindowTitle, WS_OVERLAPPEDWINDOW,
+	RegisterGeneratorWindow(hInstance);
+
+
+	hMainWindow = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, g_WindowTitle, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, NULL, NULL, hInstance, NULL);
 
-	if (hwnd == NULL)
+	if (hMainWindow == NULL)
 	{
 		MessageBox(NULL, "Window Creation Failed!", "Error!",
 			MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(hMainWindow, nCmdShow);
+	UpdateWindow(hMainWindow);
 
 	while (GetMessage(&Msg, NULL, 0, 0) > 0)
 	{
@@ -103,13 +112,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MessageBox(NULL, "Apologies, this feature is under construction.", "Under Construction", MB_OK | MB_ICONEXCLAMATION);
 			break;
 		case ID_GENERATE:
-			SetWindowText(hNote, g_Generator.GenerateLabor(6).c_str());
+			OpenGeneratorWindow(hwnd);
+			SetFocus(hLocalHour);
 			break;
 		case ID_OPENGENSET:
-			if (MessageBoxW(hwnd, L"A UI has not been completed for Generator Settings. This will directly open the Generator.txt settings file, and this access was for testing purposes.\n\nAre you sure your want to enter?", L"Wait", 
-				MB_OKCANCEL | MB_ICONERROR) == IDOK) {
+			if (MessageBox(hwnd, "No UI is available for Generator Settings. This will directly open the Generator.txt configuration file.\nThis file is only used while the AI generator is inactive.\n\nAre you sure your want to enter?", "Wait", 
+				MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK) {
 				ShellExecute(hwnd, "open", g_Generator.GetGenSettingsLoc().c_str(), NULL, NULL, SW_SHOW);
 			}
+			break;
+		case ID_GENSETHELP:
+			MessageBox(hwnd, "Tips for altering the generator's configuration:\n\n>Everything after \";;\" is ignored for commenting purposes.\n\n>Each labor \"entry\" does not need to be followed by all six numbers, but must be followed by one. For the Generator to create a bank entry, simply enter 0.\n\n>The first two numbers are the base labor amount and the random range to be added.\n\n>Next is an hourly random increase.\n\n>The last three are a bonus hour mark, a base bonus addition, and a random bonus addition.", "Manual",
+				MB_OK);
 			break;
 		case ID_CALC:
 			//Init
@@ -161,10 +175,11 @@ void AddMenu(HWND hwnd)
 	AppendMenu(hFileMenu, MF_STRING, ID_OPEN_IGNORE_LIST, "Open Ignore List");
 	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hFileMenu, MF_STRING, ID_FILE_EXIT, "Exit");
-	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File");
+	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File ");
 	//Settings Menu
 	hSettingsMenu = CreatePopupMenu();
 	AppendMenu(hSettingsMenu, MF_STRING, ID_OPENGENSET, "Settings");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_GENSETHELP, "Configuration Help");
 	AppendMenu(hSettingsMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "AI Generator");
 	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Feed AI");
@@ -207,4 +222,88 @@ void AddControls(HWND hwnd)
 	//Scrubber, Calculator, Copy to ClipBoard
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Clean, Calc, and Copy", WS_CHILD | WS_VISIBLE,
 		15, 360, 440, 50, hwnd, (HMENU)ID_CALC, GetModuleHandle(NULL), NULL);
+}
+
+void RegisterGeneratorWindow(HINSTANCE hInst){
+	WNDCLASSEX genWin = { 0 };
+
+	genWin.cbSize = sizeof(WNDCLASSEX);
+	genWin.style = 0;
+	genWin.lpfnWndProc = GenWinProc;
+	genWin.cbClsExtra = 0;
+	genWin.cbWndExtra = 0;
+	genWin.hInstance = hInst;
+	genWin.hCursor = LoadCursor(NULL, IDC_ARROW);
+	genWin.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	genWin.lpszMenuName = NULL;
+	genWin.lpszClassName = "myGeneratorWindow";
+	genWin.hIconSm = (HICON)LoadImage(hInst, "Resources\\LC Logo.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+
+	RegisterClassEx(&genWin);
+}
+
+void OpenGeneratorWindow(HWND hWnd){
+
+	GetWindowRect(hMainWindow, &rcMain);
+
+	hGenWindow = CreateWindowEx(WS_EX_CLIENTEDGE, "myGeneratorWindow", "Hours", WS_VISIBLE | WS_OVERLAPPEDWINDOW, rcMain.left+140, rcMain.top, 200, 200, hWnd, NULL, NULL, NULL);
+	if (hGenWindow == NULL)
+	{
+		MessageBox(NULL, "Window Creation Failed!", "Error!",
+			MB_ICONEXCLAMATION | MB_OK);
+	}
+
+	CreateWindowEx(NULL, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,
+		65, 15, 50, 25, hGenWindow, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+	hLocalHour = CreateWindowEx(WS_EX_CLIENTEDGE, "Edit", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
+		65, 40, 50, 50, hGenWindow, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Ok", WS_VISIBLE | WS_CHILD, 15, 100, 75, 50, hGenWindow, (HMENU)IDOK, NULL, NULL);
+	CreateWindowEx(WS_EX_CLIENTEDGE, "button", "Cancel", WS_VISIBLE | WS_CHILD, 100, 100, 75, 50, hGenWindow, (HMENU)IDCANCEL, NULL, NULL);
+
+	//Disable the main window, turning a Modless dialogue box into a modal dialogue
+	EnableWindow(hWnd, false);
+}
+
+LRESULT CALLBACK GenWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
+	switch (msg) {
+	case WM_COMMAND:
+		switch (wp)
+		{
+		case IDCANCEL:
+			EnableWindow(hMainWindow, true);
+			DestroyWindow(hWnd);
+			break;
+		case IDOK:
+			char lHourC[10] = "";
+			GetWindowText(hLocalHour, lHourC, 10);
+			std::string lHours = lHourC;
+			//All non-numbers to whitespace
+			for (unsigned i = 0; i < lHours.size(); i++) {
+				if (lHours[i] < 48 || lHours[i] > 57) {
+					lHours[i] = 32;
+				}
+			}
+			//Remove Whitespace
+			while (lHours.find(" ") != std::string::npos) {
+				lHours.erase(lHours.find(" "), 1);
+			}
+			unsigned setHours = 0;
+			if (!lHours.empty()) {
+				setHours = std::stoul(lHours);
+			}
+			SetWindowText(hNote, g_Generator.GenerateLabor(setHours).c_str());
+			EnableWindow(hMainWindow, true);
+			DestroyWindow(hWnd);
+			break;
+		}
+		break;
+	case WM_CLOSE:
+		EnableWindow(hMainWindow, true);
+		DestroyWindow(hWnd);
+		break;
+	default:
+		return DefWindowProc(hWnd, msg, wp, lp);
+	}
+	return 0;
 }
