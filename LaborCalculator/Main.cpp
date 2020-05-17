@@ -18,7 +18,7 @@
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
-const char g_WindowTitle[] = "Labor Calculator V0.0.3";
+const char g_WindowTitle[] = "Labor Calculator V0.0.4";
 NoteParser g_Crafter;
 Generator g_Generator;
 HWND hMainWindow, hGenWindow, hNote, hHour, hLocalHour, hMin;
@@ -253,8 +253,8 @@ void OpenGeneratorWindow(HWND hWnd){
 			MB_ICONEXCLAMATION | MB_OK);
 	}
 
-	CreateWindowEx(NULL, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,
-		65, 15, 50, 25, hGenWindow, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+	CreateWindowEx(NULL, "Static", " Hours Owned", WS_CHILD | WS_VISIBLE | SS_CENTER,
+		40, 15, 100, 25, hGenWindow, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
 	hLocalHour = CreateWindowEx(WS_EX_CLIENTEDGE, "Edit", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
 		65, 40, 50, 50, hGenWindow, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
@@ -278,9 +278,9 @@ LRESULT CALLBACK GenWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			char lHourC[10] = "";
 			GetWindowText(hLocalHour, lHourC, 10);
 			std::string lHours = lHourC;
-			//All non-numbers to whitespace
+			//All non-numbers to whitespace (Excluding Demcimals, which Stoul ignores anyway)
 			for (unsigned i = 0; i < lHours.size(); i++) {
-				if (lHours[i] < 48 || lHours[i] > 57) {
+				if ((lHours[i] < 48 || lHours[i] > 57) && lHours[i] != 46) {
 					lHours[i] = 32;
 				}
 			}
@@ -288,9 +288,22 @@ LRESULT CALLBACK GenWinProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 			while (lHours.find(" ") != std::string::npos) {
 				lHours.erase(lHours.find(" "), 1);
 			}
+			//Remove Double Decimals
+			while (lHours.find("..") != std::string::npos) {
+				lHours.erase(lHours.find(".."), 1);
+			}
 			unsigned setHours = 0;
 			if (!lHours.empty()) {
-				setHours = std::stoul(lHours);
+				//Handle first decimal
+				if (lHours.find(".") != 0) {
+					setHours = std::stoul(lHours);
+				}
+				//Handle after Decimal
+				if (lHours.find(".") != std::string::npos && lHours.find(".") != lHours.size() - 1) {
+					if (lHours[lHours.find(".") + 1] >= 53) {
+						setHours++;
+					}
+				}
 			}
 			SetWindowText(hNote, g_Generator.GenerateLabor(setHours).c_str());
 			EnableWindow(hMainWindow, true);
