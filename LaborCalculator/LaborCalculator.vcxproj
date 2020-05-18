@@ -141,6 +141,7 @@
     <Text Include="Settings\IgnoreList.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\LC Banner.bmp" />
     <Image Include="Resources\LC Logo.bmp" />
     <Image Include="Resources\LC Logo.ico" />
   </ItemGroup>

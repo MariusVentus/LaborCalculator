@@ -14,7 +14,7 @@ V0.0.2 - Generator added which randomly generates expected labor from a period o
 
 V0.0.3 - Added Generator window for the input of hours. Determined that Settings button not optimal for generator settings, since it effectively requires altering the config. Added manual instead.
 
-V0.0.4 - Quick update to the Generator. Now when asking about Hours owned, it can take numbers with decimals, although it still rounds to nearest integer. 
+V0.0.4 - Quick update to the Generator. Now when asking about Hours owned, it can take numbers with decimals, although it still rounds to nearest integer. Added a banner!
 
 ***Planned Features (Warning: Doing this for fun in my free time. Updates will be slow, if at all)***
 

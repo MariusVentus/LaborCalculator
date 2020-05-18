@@ -60,6 +60,9 @@
     <Image Include="Resources\LC Logo.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\LC Banner.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

@@ -21,8 +21,10 @@ const char g_szClassName[] = "mainWindow";
 const char g_WindowTitle[] = "Labor Calculator V0.0.4";
 NoteParser g_Crafter;
 Generator g_Generator;
-HWND hMainWindow, hGenWindow, hNote, hHour, hLocalHour, hMin;
+HWND hMainWindow, hBanner, hGenWindow, hNote, hHour, hLocalHour, hMin;
 RECT rcMain;
+HBITMAP hBannerImage;
+
 
 
 //Global Funcs
@@ -64,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 
 	hMainWindow = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, g_WindowTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, NULL, NULL, hInstance, NULL);
+		CW_USEDEFAULT, CW_USEDEFAULT, 500, 520, NULL, NULL, hInstance, NULL);
 
 	if (hMainWindow == NULL)
 	{
@@ -197,31 +199,41 @@ void AddMenu(HWND hwnd)
 void AddControls(HWND hwnd)
 {
 
+
+	//Logo and Title --------------------------------------------------
+	hBannerImage = (HBITMAP)LoadImage(NULL, "Resources\\LC Banner.bmp", IMAGE_BITMAP, 480, 50, LR_LOADFROMFILE);
+	if (hBannerImage == NULL) { MessageBox(hwnd, "Could not load Logo!", "Error", MB_OK | MB_ICONEXCLAMATION); }
+	hBanner = CreateWindowEx(NULL, "static", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 0, 0, 480, 50, hwnd, NULL, NULL, NULL);
+	if (hBanner == NULL) { MessageBox(hwnd, "Logo window creation failed!", "Error", MB_OK | MB_ICONEXCLAMATION); }
+	SendMessage(hBanner, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBannerImage);
+
+	//Main Controls 
+
 	//Notes
 	CreateWindowEx(WS_EX_CLIENTEDGE, "STATIC", " Labor Notes ", WS_CHILD | WS_VISIBLE,
-		15, 20, 380, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+		15, 45, 380, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
 	hNote = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "Action A | X Minutes\r\nAction B | Y Minutes\r\nAction C | Z Minutes",
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-		15, 45, 380, 300, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		15, 70, 380, 300, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
 	//Generate
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Generate", WS_CHILD | WS_VISIBLE,
-		400, 20, 70, 50, hwnd, (HMENU)ID_GENERATE, GetModuleHandle(NULL), NULL);
+		400, 45, 70, 50, hwnd, (HMENU)ID_GENERATE, GetModuleHandle(NULL), NULL);
 
 	//Hours
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Hours ", WS_CHILD | WS_VISIBLE | SS_CENTER,
-		400, 75, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+		400, 100, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
 	hHour = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
-		400, 100, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		400, 125, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 	//Minutes
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Static", " Minutes ", WS_CHILD | WS_VISIBLE | SS_CENTER,
-		400, 155, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
+		400, 180, 70, 25, hwnd, (HMENU)ID_INPROGRESS, GetModuleHandle(NULL), NULL);
 	hMin = CreateWindowEx(WS_EX_CLIENTEDGE, "Static", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | SS_CENTER,
-		400, 180, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+		400, 205, 70, 50, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
 
 	//Scrubber, Calculator, Copy to ClipBoard
 	CreateWindowEx(WS_EX_CLIENTEDGE, "Button", "Clean, Calc, and Copy", WS_CHILD | WS_VISIBLE,
-		15, 360, 440, 50, hwnd, (HMENU)ID_CALC, GetModuleHandle(NULL), NULL);
+		15, 385, 440, 50, hwnd, (HMENU)ID_CALC, GetModuleHandle(NULL), NULL);
 }
 
 void RegisterGeneratorWindow(HINSTANCE hInst){
