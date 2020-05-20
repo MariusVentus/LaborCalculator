@@ -95,12 +95,22 @@ bool NoteParser::InvestigateNumbers(std::string line)
 	NormalizeLine(line);
 	if (line.find(" ") != std::string::npos && !line.empty()) {
 		line.erase(0, line.find_last_of(" "));
-		m_Minutes += std::stoul(line);
-		return true;
+		if (std::stoul(line) != 0) {
+			m_Minutes += std::stoul(line);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else if (!line.empty()) {
-		m_Minutes += std::stoul(line);
-		return true;
+		if (std::stoul(line) != 0) {
+			m_Minutes += std::stoul(line);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
 		return false;
