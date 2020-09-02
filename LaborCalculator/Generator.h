@@ -9,6 +9,11 @@ public:
 	void RefreshGeneratorSettings(void);
 	std::string GenerateLabor(const unsigned inHours);
 	std::string GetGenSettingsLoc(void) const { return m_GenSettingsLoc; }
+
+	double GetEntropy(void) const { return m_Rand.PollEntropy(); }
+	unsigned GetDeviceSeed(void) const { return m_Rand.PollDeviceSeed(); }
+	unsigned long long GetTimeSeed(void) const { return m_Rand.PollTimeSeed(); }
+
 private:
 	const std::string m_GenSettingsLoc = "Settings\\Generator.txt";
 	class LaborEvent {

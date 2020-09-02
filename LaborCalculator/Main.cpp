@@ -13,12 +13,13 @@
 #define ID_GENERATE 9006
 #define ID_OPENGENSET 9007
 #define ID_GENSETHELP 9008
+#define ID_CHECKSEEDS 9009
 #define ID_INPROGRESS 9020
 
 
 //Global Entities
 const char g_szClassName[] = "mainWindow";
-const char g_WindowTitle[] = "Labor Calculator V0.0.4";
+const char g_WindowTitle[] = "Labor Calculator V0.0.45";
 NoteParser g_Crafter;
 Generator g_Generator;
 HWND hMainWindow, hBanner, hGenWindow, hNote, hHour, hLocalHour, hMin;
@@ -127,6 +128,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MessageBox(hwnd, "Tips for altering the generator's configuration:\n\n>Everything after \";;\" is ignored for commenting purposes.\n\n>Each labor \"entry\" does not need to be followed by all six numbers, but must be followed by one. For the Generator to create a bank entry, simply enter 0.\n\n>The first two numbers are the base labor amount and the random range to be added.\n\n>Next is an hourly random increase.\n\n>The last three are a bonus hour mark, a base bonus addition, and a random bonus addition.", "Manual",
 				MB_OK);
 			break;
+		case ID_CHECKSEEDS:
+		{
+			//Entropy
+			std::string seedOut = "Generator Entropy: ";
+			seedOut.append(std::to_string(g_Generator.GetEntropy()));
+			seedOut.append("\n");
+			//Device Seed
+			seedOut.append("Generator Seed: ");
+			seedOut.append(std::to_string(g_Generator.GetDeviceSeed()));
+			seedOut.append("\n");
+			//Time Seed
+			seedOut.append("Backup Seed (Used when Entropy is 0.0): ");
+			seedOut.append(std::to_string(g_Generator.GetTimeSeed()));
+
+			MessageBox(hwnd, seedOut.c_str(), "Seed Info", MB_OK);
+		}
+			break;
 		case ID_CALC:
 			//Init
 			char rawNote[3000] = "";
@@ -180,13 +198,15 @@ void AddMenu(HWND hwnd)
 	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hFileMenu, "File ");
 	//Settings Menu
 	hSettingsMenu = CreatePopupMenu();
-	AppendMenu(hSettingsMenu, MF_STRING, ID_OPENGENSET, "Settings");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Main Settings");
+	AppendMenu(hSettingsMenu, MF_SEPARATOR, NULL, NULL);
+	AppendMenu(hSettingsMenu, MF_STRING, ID_OPENGENSET, "Generator");
+	AppendMenu(hSettingsMenu, MF_STRING, ID_CHECKSEEDS, "Check Seed");
 	AppendMenu(hSettingsMenu, MF_STRING, ID_GENSETHELP, "Configuration Help");
 	AppendMenu(hSettingsMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "AI Generator");
-	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Feed AI");
-	AppendMenu(hSettingsMenu, MF_STRING, ID_INPROGRESS, "Train AI");
-	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSettingsMenu, "Generator");
+
+	AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSettingsMenu, "Settings");
 
 
 	//Remaining Main Menu Items1e1e1e

@@ -1,9 +1,15 @@
 #include "RandHandler.h"
+#include <chrono>
 
 RandHandler::RandHandler()
 	:
-	rng(rd())
+	m_DeviceSeed(rd()),
+	m_TimeSeed(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
+	rng(m_DeviceSeed)
 {
+	if (rd.entropy() == 0.0) {
+		rng.seed((unsigned)m_TimeSeed);
+	}
 }
 
 unsigned RandHandler::Generate(unsigned base, unsigned range)
