@@ -1,15 +1,10 @@
 #include "RandHandler.h"
-#include <chrono>
+#include <array>
 
 RandHandler::RandHandler()
 	:
-	m_DeviceSeed(rd()),
-	m_TimeSeed(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
-	rng(m_DeviceSeed)
+	rng(PrimeGenerator())
 {
-	if (rd.entropy() == 0.0) {
-		rng.seed((unsigned)m_TimeSeed);
-	}
 }
 
 unsigned RandHandler::Generate(unsigned base, unsigned range)
@@ -21,4 +16,14 @@ unsigned RandHandler::Generate(unsigned base, unsigned range)
 	else {
 		return base;
 	}
+}
+
+std::mt19937 RandHandler::PrimeGenerator(void)
+{
+	std::random_device rd;
+	std::array<std::random_device::result_type, std::mt19937::state_size> seed_data;
+	std::generate_n(seed_data.data(), seed_data.size(), std::ref(rd));
+	std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+
+	return std::mt19937(seq);
 }
